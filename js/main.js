@@ -9,7 +9,7 @@ Vue.component('note-card', {
         }
     },
     template: `
-        <div class="card" :class="{'expired': status === 'Просрочено', 'on-time': status === 'Выполнено в срок'}">
+    <div class="card" :class="{'expired': status === 'Просрочено', 'on-time': status === 'Выполнено в срок'}">
             <div v-if="!isEditing && !isReturning">
                 <p><small>Создано: {{ task.createdAt }}</small></p>
                 <p v-if="task.lastEdit"><small>Изм: {{ task.lastEdit }}</small></p>
@@ -65,7 +65,7 @@ Vue.component('note-card', {
                 this.$emit('return-task', { id: this.task.id, reason: this.returnReason })
                 this.isReturning = false
                 this.returnReason = ''
-                task.columnId = 2
+                this.task.columnId = 2
             } else {
                 alert("Пожалуйста, укажите причину")
             }
@@ -140,6 +140,7 @@ Vue.component('kanban-board', {
                 @remove-task="removeTask"
                 @edit-task="editTask"
                 @move-task="moveTask">
+                @return-task="returnTask"
             </kanban-column>
         </div>
     `,
