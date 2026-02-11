@@ -1,29 +1,111 @@
-* {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-}
-
 .board {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
-    justify-content: center;
+    align-items: flex-start;
     gap: 20px;
     padding: 20px;
+    background-color: #f4f7f9;
+    min-height: 100vh;
 }
 
 .column {
-    background-color: #dadada;
-    border-radius: 5px;
-    min-width: 380px;
-    padding: 12px;
+    background-color: #ebedf0;
+    border-radius: 8px;
+    min-width: 300px;
+    width: 300px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
 }
 
 .column h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
     text-align: center;
 }
+
+.add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-left: 3px solid transparent;
+}
+
+.card h4 {
+    margin: 8px 0;
+}
+
+.card p {
+    font-size: 0.9rem;
+    color: #444;
+    margin: 5px 0;
+}
+
+.card.expired {
+    border-left-color: #eb5757;
+    background-color: #fff5f5;
+}
+
+.card.on-time {
+    border-left-color: #61bd4f;
+    background-color: #f6ffed;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    background: #eee;
+    margin-bottom: 8px;
+}
+
+.expired .status-badge { background: #ffdada; color: #ae2e2e; }
+.on-time .status-badge { background: #d4edda; color: #106b25; }
+
+.reason {
+    background-color: #fff3cd;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    font-style: italic;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+}
+
+button:hover { opacity: 0.8; }
+
+button:not(:last-child) { margin-right: 5px; }
+
+button { background-color: #007bff; color: white; }
+button[style*="background-color: red"], .btn-remove { background-color: #eb5757; }
+.add-form button { background-color: #5eb4ef; margin-top: 5px; }
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+textarea { resize: vertical; min-height: 60px; }
