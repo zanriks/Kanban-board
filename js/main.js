@@ -9,15 +9,20 @@ Vue.component('note-card', {
         }
     },
     template: `
-        <div class="card">
+        <div class="card" :class="{'expired': status === 'Просрочено', 'on-time': status === 'Выполнено в срок'}">
             <div v-if="!isEditing && !isReturning">
                 <p><small>Создано: {{ task.createdAt }}</small></p>
                 <p v-if="task.lastEdit"><small>Изм: {{ task.lastEdit }}</small></p>
+
                 <h4 :style="columnId === 4 ? 'text-decoration: line-through' : ''">{{ task.title }}</h4>
+
+                <!-- Отображение статуса в 4 столбце -->
+                <p v-if="status" class="status-badge">
+                    <strong>Статус: {{ status }}</strong>
+                </p>
+
                 <p>{{ task.description }}</p>
-
                 <p v-if="task.returnReason" class="reason"><b>Причина возврата:</b> {{ task.returnReason }}</p>
-
                 <p><b>Срок:</b> {{ task.deadline }}</p>
 
                 <div v-if="columnId !== 4">
@@ -38,6 +43,7 @@ Vue.component('note-card', {
             <div v-else-if="isEditing">
                 <input v-model="editData.title">
                 <textarea v-model="editData.description"></textarea>
+                <input type="date" v-model="editData.deadline">
                 <button @click="save">Сохранить</button>
                 <button @click="isEditing = false">Отмена</button>
             </div>
@@ -63,6 +69,18 @@ Vue.component('note-card', {
             } else {
                 alert("Пожалуйста, укажите причину")
             }
+        }
+    },
+    computed: {
+        status() {
+            if (this.columnId !== 4) return null
+
+            const now = new Date()
+            const deadline = new Date(this.task.deadline)
+
+            deadline.setHours(23, 59, 59)
+
+            return now > deadline ? 'Просрочено' : 'Выполнено в срок'
         }
     }
 })
