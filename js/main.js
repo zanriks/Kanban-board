@@ -1,41 +1,68 @@
 Vue.component('note-card', {
-    // Добавили 'columnId' в список пропсов
     props: ['task', 'showMove', 'columnId'],
     data() {
         return {
+            isReturning: false,
+            returnReason: '',
             isEditing: false,
             editData: { ...this.task }
         }
     },
     template: `
         <div class="card">
-            <div v-if="!isEditing">
+            <div v-if="!isEditing && !isReturning">
                 <p><small>Создано: {{ task.createdAt }}</small></p>
                 <p v-if="task.lastEdit"><small>Изм: {{ task.lastEdit }}</small></p>
-                <h4>{{ task.title }}</h4>
+                <h4 :style="columnId === 4 ? 'text-decoration: line-through' : ''">{{ task.title }}</h4>
                 <p>{{ task.description }}</p>
+
+                <p v-if="task.returnReason" class="reason"><b>Причина возврата:</b> {{ task.returnReason }}</p>
+
                 <p><b>Срок:</b> {{ task.deadline }}</p>
 
-                <button @click="isEditing = true">Редактировать</button>
-                <button @click="$emit('remove')">Удалить</button>
+                <div v-if="columnId !== 4">
+                    <button @click="isEditing = true">Редактировать</button>
+                    <button @click="$emit('remove')">Удалить</button>
 
-                <button v-if="columnId === 1 || columnId === 2" @click="$emit('move')">
-                    {{ columnId === 1 ? 'В работу' : 'В тестирование' }}
-                </button>
+                    <template v-if="columnId === 3">
+                        <button @click="$emit('move')">Выполнено</button>
+                        <button @click="isReturning = true">Вернуть в работу</button>
+                    </template>
+
+                    <button v-if="columnId < 3" @click="$emit('move')">
+                        {{ columnId === 1 ? 'В работу' : 'В тестирование' }}
+                    </button>
+                </div>
             </div>
 
-            <div v-else>
+            <div v-else-if="isEditing">
                 <input v-model="editData.title">
                 <textarea v-model="editData.description"></textarea>
                 <button @click="save">Сохранить</button>
                 <button @click="isEditing = false">Отмена</button>
             </div>
+
+            <div v-else-if="isReturning">
+                <textarea v-model="returnReason" placeholder="Укажите причину возврата"></textarea>
+                <button @click="confirmReturn">Подтвердить возврат</button>
+                <button @click="isReturning = false">Отмена</button>
+            </div>
         </div>
     `,
     methods: {
         save() {
-            this.$emit('edit', { ...this.editData });
-            this.isEditing = false;
+            this.$emit('edit', { ...this.editData })
+            this.isEditing = false
+        },
+        confirmReturn() {
+            if (this.returnReason.trim()) {
+                this.$emit('return-task', { id: this.task.id, reason: this.returnReason })
+                this.isReturning = false
+                this.returnReason = ''
+                task.columnId = 2
+            } else {
+                alert("Пожалуйста, укажите причину")
+            }
         }
     }
 })
@@ -66,6 +93,7 @@ Vue.component('kanban-column', {
                 :task="task"
                 :column-id="column.id"
                 :show-move="column.id === 1 || column.id === 2"
+                @return-task="$emit('return-task', $event)"
                 @remove="$emit('remove-task', task.id)"
                 @edit="$emit('edit-task', $event)"
                 @move="$emit('move-task', task.id)">
@@ -76,7 +104,7 @@ Vue.component('kanban-column', {
         submitTask() {
             if(this.newTitle) {
                 this.$emit('add-task', { title: this.newTitle, description: this.newDesc, deadline: this.newDeadline })
-                this.newTitle = ''; this.newDesc = ''; this.newDeadline = '';
+                this.newTitle = ''; this.newDesc = ''; this.newDeadline = ''
             }
         }
     }
@@ -130,31 +158,38 @@ Vue.component('kanban-board', {
             const index = this.tasks.findIndex(t => t.id === updatedTask.id)
             if (index !== -1) {
                 this.tasks.splice(index, 1, {
+                    ...this.tasks[index],
                     ...updatedTask,
                     lastEdit: new Date().toLocaleString()
                 })
             }
             this.saveToStorage()
         },
-        moveTask(id) {
+        returnTask({ id, reason }) {
             const task = this.tasks.find(t => t.id === id)
-            if (task && task.columnId === 1) {
+            if (task && task.columnId === 3) {
                 task.columnId = 2
-                task.lastEdit = new Date().toLocaleString()
-            } else if (task && task.columnId === 2) {
-                task.columnId = 3
+                task.returnReason = reason
                 task.lastEdit = new Date().toLocaleString()
             }
-            this.saveToStorage()
         },
+        moveTask(id) {
+            const task = this.tasks.find(t => t.id === id)
+            if (task && task.columnId < 4) {
+                task.columnId++
+                task.lastEdit = new Date().toLocaleString()
+                if (task.columnId === 4) task.returnReason = null
+            }
+        },
+
         loadFromStorage() {
-            const saved = localStorage.getItem('kanban_board');
+            const saved = localStorage.getItem('kanban_board')
             if (saved) {
                 try {
-                    this.tasks = JSON.parse(saved);
+                    this.tasks = JSON.parse(saved)
                 } catch (e) {
-                    console.error('Ошибка загрузки:', e);
-                    this.tasks = [];
+                    console.error('Ошибка загрузки:', e)
+                    this.tasks = []
                 }
             }
         },
