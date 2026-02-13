@@ -27,6 +27,7 @@ Vue.component('note-card', {
                 <div v-if="columnId !== 4">
                     <button @click="isEditing = true">Редактировать</button>
                     <button v-if="columnId === 1" @click="$emit('remove')">Удалить</button>
+                    <button @click="$emit('remove')">Удалить</button>
 
                     <template v-if="columnId === 3">
                         <button @click="$emit('move')">Выполнено</button>
